@@ -116,6 +116,27 @@ function renderTable() {
 
         tbody.appendChild(tr);
     });
+    // update counts footer
+    try {
+        const countsEl = document.getElementById('library-counts');
+        if (countsEl) {
+            const total = books.length;
+            const shown = filtered.length;
+            const shownAvailable = filtered.filter(b => isBookAvailable(b)).length;
+            // Example: Showing 2/4 books — Available: 1/3
+            countsEl.textContent = `Showing ${shown}/${total} books — Available: ${shownAvailable}/${total}`;
+        }
+    } catch (err) {
+        // ignore
+    }
+}
+
+function isBookAvailable(b) {
+    const v = b && b.available;
+    if (typeof v === 'boolean') return v;
+    if (typeof v === 'string') return v.toLowerCase().startsWith('y') || v.toLowerCase() === 'true';
+    if (v==null) return false;
+    return Boolean(v);
 }
 
 function setupAdminForm() {
@@ -191,6 +212,12 @@ document.addEventListener('DOMContentLoaded', () => {
         controls.appendChild(clearBtn);
 
         table.parentNode.insertBefore(controls, table);
+        // counts footer (insert after table)
+        const counts = document.createElement('div');
+        counts.id = 'library-counts';
+        counts.style.margin = '8px 0 16px 0';
+        counts.style.fontWeight = '600';
+        table.parentNode.insertBefore(counts, table.nextSibling);
     }
 });
 
