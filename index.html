@@ -4,6 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Library</title>
+    <style>
+        /* Small, unobtrusive page styles */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: #f5f6f8;
+            color: #222;
+            margin: 0;
+            padding: 18px;
+        }
+        header { text-align: center; margin-bottom: 14px; }
+        main {
+            max-width: 980px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 6px 18px rgba(15,20,30,0.06);
+        }
+        h1 { margin: 0 0 6px 0; }
+        h2 { margin-top: 0; color: #333; }
+        #search-input { display: block; margin: 8px 0 12px 0; padding: 6px 8px; width: 100%; max-width: 360px; box-sizing: border-box; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+        table th, table td { border: 1px solid #e3e6ea; padding: 8px 10px; }
+        table thead th { background: #f3f4f6; text-transform: capitalize; }
+        fieldset { border: none; padding: 0; margin: 12px 0 0 0; }
+        /* make the form appear in two columns */
+        form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px 14px;
+            align-items: start;
+        }
+        /* each field wrapper is the grid item */
+        form > div { margin: 0; }
+        label { display: block; font-size: 0.9rem; margin-bottom: 4px; color: #333; }
+        input[type="text"], input[type="number"], input[type="search"] { padding: 6px 8px; border: 1px solid #d7dbe0; border-radius: 4px; width: 100%; box-sizing: border-box; }
+        /* make the submit button span both columns */
+        .full { grid-column: 1 / -1; margin-top: 6px; }
+        button { background: #1976d2; color: #fff; border: 1px solid #125ea8; padding: 7px 12px; border-radius: 6px; cursor: pointer; }
+        button[type="button"] { background: #e53935; border-color: #b52a27; }
+        @media (max-width: 640px) { form { grid-template-columns: 1fr; } main { padding: 12px; } #search-input { max-width: 100%; } }
+    </style>
 </head>
 <body>
 
@@ -58,8 +100,6 @@
         </div>
     </form>
     </fieldset>
-
-        <button id="clearLocalStorageButton">Clear Local Storage</button>
 
     </main>
     <script src="script.js"></script>
