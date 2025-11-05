@@ -1,64 +1,83 @@
-
-// Key used in localStorage:
-const STORAGE_KEY = 'libraryBooks';
-
-let books = [];
-let searchQuery = '';
-
-function setSearchQuery(q) {
-    searchQuery = String(q || '').trim();
-    renderTable();
-}
-
-function getStoredBooks() {
-    try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return null;
-        const parsed = JSON.parse(raw);
-        return Array.isArray(parsed) ? parsed : null;//parse the data from the json file
-    } catch (err) {
-        console.error('Error reading from localStorage', err);
-        return null;
+let library = [
+    {
+        "code": 1,
+        "title": "crime and punishment",
+        "author": "Fyodor Dostoevsky",
+        "year": 1866,
+        "available": true,
+        "price": 9.99
+    },
+    {
+        "code": 2,
+        "title": "to kill a mockingbird",
+        "author": "Harper Lee",
+        "year": 1960,
+        "available": false,
+        "price": 7.99
+    },
+    {
+        "code": 3,
+        "title": "1984",
+        "author": "George Orwell",
+        "year": 1949,
+        "available": true,
+        "price": 8.99
+    },
+    {
+        "code": 4,
+        "title": "the great gatsby",
+        "author": "F. Scott Fitzgerald",
+        "year": 1925,
+        "available": true,
+        "price": 10.99
     }
-}
+];
+function filterTable() {
+    // lower case
+    const input = document.getElementById('search-input');
+    const filter = input.value.toLowerCase();
+    
+    // get table and rows
+    const table = document.getElementById('library-table');
+    const tr = table.getElementsByTagName('tr'); 
 
-function saveStoredBooks() {
-    try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(books));//saves the data of books as an json file 
-    } catch (err) {
-        console.error('Error saving to localStorage', err);
-    }
-}
-//try local storage first, if not found fetch from json file
-async function loadJsonData() {
-    // Try localStorage first
-    const stored = getStoredBooks();
-    if (stored) {
-        books = stored;
-        renderTable();
-        return;
-    }
+    // start from 1 to skip header
+    for (let i = 1; i < tr.length; i++) {
+        let rowContainsFilter = false;
+        
+        // Get all the <td> (data cells) in the current row
+        const tds = tr[i].getElementsByTagName('td');
+        
+        //
+        for (let j = 0; j < tds.length; j++) {
+            const td = tds[j];
+            if (td) {
+                //get cell text
+                const cellText = td.textContent || td.innerText;
+                
+                //check if the same
+                if (cellText.toLowerCase().indexOf(filter) > -1) {
+                    rowContainsFilter = true;
+                    break; // if true stop
+                }
+            }
+        }
 
-    // Fallback: fetch initial data from library.json and persist to localStorage
-    try {
-        const response = await fetch('library.json');
-        const data = await response.json();
-        books = Array.isArray(data) ? data : [];
-    } catch (error) {
-        console.error('Error loading JSON data:', error);
-        books = [];
+        if (rowContainsFilter) {
+            tr[i].style.display = ""; // Show the row
+        } else {
+            tr[i].style.display = "none"; // Hide the row
+        }
     }
-    saveStoredBooks();
-    renderTable();
 }
 
 function renderTable() {
-    const table = document.getElementById('library-table');
-    if (!table) return;
+    const tableEl = document.getElementById('library-table');
+    if (!tableEl) return;
 
-    const theadTr = table.querySelector('thead tr');
-    const tbody = table.querySelector('tbody');
-
+    const theadTr = tableEl.querySelector('thead tr');
+    const tbody = tableEl.querySelector('tbody');
+// clear existing content   
     theadTr.innerHTML = '';
     tbody.innerHTML = '';
 
@@ -69,28 +88,13 @@ function renderTable() {
         th.textContent = h;
         theadTr.appendChild(th);
     });
-    //action header to add delete button
+    //delete action header
     const thAction = document.createElement('th');
     thAction.textContent = 'Actions';
     theadTr.appendChild(thAction);
+    
 
-    //data empty 
-    // apply search filter by title if any
-    const filtered = searchQuery
-        ? books.filter(b => (b.title || '').toString().toLowerCase().includes(searchQuery.toLowerCase()))
-        : books;
-
-    if (!filtered || filtered.length === 0) {
-        const tr = document.createElement('tr');
-        const td = document.createElement('td');
-        td.colSpan = HEADERS.length + 1;
-        td.textContent = searchQuery ? 'No matching books.' : 'No books available.';
-        tr.appendChild(td);
-        tbody.appendChild(tr);
-        return;
-    }
-
-    filtered.forEach((book) => {
+    library.forEach((book) => {
         const tr = document.createElement('tr');
         HEADERS.forEach((h) => {
             const td = document.createElement('td');
@@ -99,46 +103,29 @@ function renderTable() {
             td.textContent = (val === undefined || val === null) ? '' : val;
             tr.appendChild(td);
         });
-
+        //delete button
         const actionTd = document.createElement('td');
         const deleteButton = document.createElement('button');
         deleteButton.type = 'button';
         deleteButton.textContent = 'Delete';
         deleteButton.addEventListener('click', () => {
+            // conform dialog
             const ok = confirm(`Delete book ${book.title} (code ${book.code})?`);
             if (!ok) return;
-            books = books.filter(b => String(b.code) !== String(book.code));
-            saveStoredBooks();
+
+            // remove book from array
+            library = library.filter(b => String(b.code) !== String(book.code));
+            
+            // render tablb
             renderTable();
         });
         actionTd.appendChild(deleteButton);
         tr.appendChild(actionTd);
-
         tbody.appendChild(tr);
+        filterTable();
     });
-    // update counts footer
-    try {
-        const countsEl = document.getElementById('library-counts');
-        if (countsEl) {
-            const total = books.length;
-            const shown = filtered.length;
-            const shownAvailable = filtered.filter(b => isBookAvailable(b)).length;
-            // Example: Showing 2/4 books — Available: 1/3
-            countsEl.textContent = `Showing ${shown}/${total} books — Available: ${shownAvailable}/${total}`;
-        }
-    } catch (err) {
-        // ignore
-    }
+    
 }
-
-function isBookAvailable(b) {
-    const v = b && b.available;
-    if (typeof v === 'boolean') return v;
-    if (typeof v === 'string') return v.toLowerCase().startsWith('y') || v.toLowerCase() === 'true';
-    if (v==null) return false;
-    return Boolean(v);
-}
-
 function setupAdminForm() {
     const form = document.getElementById('book-form');
     if (!form) return;
@@ -160,69 +147,25 @@ function setupAdminForm() {
         const available = availableEl ? !!availableEl.checked : false;
         const price = priceEl ? (priceEl.value ? Number(priceEl.value) : '') : '';
 
-        if (!code || !title) {
-            alert('Code and Title are required.');
-            return;
-        }
+        //if (!code || !title) {
+        //    alert('Code and Title are required.');
+        //    return;
+        //}
 
         // no duplicate code
-        if (books.some(b => String(b.code) === String(code))) {
+        if (library.some(b => String(b.code) === String(code))) {
             alert('A book with this code already exists. Choose a different code.');
             return;
         }
 
         const newBook = { code: code, title: title, author: author, year: year, available: available, price: price };
-        books.push(newBook);
-        saveStoredBooks();
-        renderTable();
+        library.push(newBook);
+    renderTable();
 
         form.reset();
-        alert('Book added and saved to localStorage.');
+    alert('Book added.');
     });
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-    loadJsonData();
-    setupAdminForm();
-    // create search control above the table
-    const table = document.getElementById('library-table');
-    if (table && table.parentNode) {
-        const controls = document.createElement('div');
-        controls.id = 'library-search-controls';
-        controls.style.margin = '10px 0';
-
-        const label = document.createElement('label');
-        label.textContent = 'Search by title: ';
-        label.htmlFor = 'library-search-input';
-
-        const input = document.createElement('input');
-        input.type = 'search';
-        input.id = 'library-search-input';
-        input.placeholder = 'Enter title to search...';
-        input.style.marginRight = '6px';
-        input.addEventListener('input', (e) => setSearchQuery(e.target.value));
-
-        const clearBtn = document.createElement('button');
-        clearBtn.type = 'button';
-        clearBtn.textContent = 'Clear';
-        clearBtn.addEventListener('click', () => { input.value = ''; setSearchQuery(''); input.focus(); });
-
-        controls.appendChild(label);
-        controls.appendChild(input);
-        controls.appendChild(clearBtn);
-
-        table.parentNode.insertBefore(controls, table);
-        // counts footer (insert after table)
-        const counts = document.createElement('div');
-        counts.id = 'library-counts';
-        counts.style.margin = '8px 0 16px 0';
-        counts.style.fontWeight = '600';
-        table.parentNode.insertBefore(counts, table.nextSibling);
-    }
-});
-
-document.getElementById('clearLocalStorageButton').addEventListener('click', function() {
-    localStorage.clear();
-    console.log('Local Storage cleared.');
-    location.reload();
-    });
+setupAdminForm();   
+renderTable();
+document.getElementById('search-input').addEventListener('keyup', filterTable);

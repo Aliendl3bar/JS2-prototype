@@ -6,15 +6,14 @@
     <title>Library</title>
 </head>
 <body>
+
     <header>
         <h1>Welcome to The library!</h1>
-        <nav>
-            <a href="index.html">Library Page</a>
-            <a href="admin.html">Admin Page</a>
-        </nav>
     </header>
     <main>
+        
         <h2>library</h2>
+        <input type="text" id="search-input" placeholder="Search by title, author, or year...">
         <table id="library-table" border="1">
             <thead>
                 <tr>
@@ -25,6 +24,40 @@
                 
             </tbody>
         </table>
+
+        <fieldset>
+    <form id="book-form">
+        <div>
+            <label for="code">code</label>
+            <input id="code" name="code" type="text" required />
+        </div>
+        <div>
+            <label for="title">Title</label>
+            <input id="title" name="title" type="text" required />
+        </div>
+        
+        <div>
+            <label for="author">Author</label>
+            <input id="author" name="author" type="text" required />
+        </div>
+        <div>
+            <label for="year">Year</label>
+            <input id="year" name="year" type="number" min="1" />
+        </div>
+        <div>
+            <label for="available">available</label>
+            <input id="available" name="available" type="checkbox"  />
+        </div>
+        <div>
+            <label for="price">price</label>
+            <input id="price" name="price" type="number" min="1" />
+        </div>
+        
+        <div class="full">
+            <button type="submit">Add Book</button>
+        </div>
+    </form>
+    </fieldset>
 
         <button id="clearLocalStorageButton">Clear Local Storage</button>
 
